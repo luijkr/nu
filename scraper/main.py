@@ -40,29 +40,32 @@ def extract_article(page_link):
     # parse html
     soup = BeautifulSoup(r.content, 'html.parser')
 
-    # article title
-    article_title = soup.find('div', class_='title')
     try:
-        article_title = article_title.find('h1').text.strip(' \n ')
+        # article title
+        article_title = soup.find('div', class_='title')
+        try:
+            article_title = article_title.find('h1').text.strip(' \n ')
+        except:
+            article_title = article_title.text.strip(' \n ')
+
+        # find block with article text
+        article_body = soup.find('div', class_='block article body')
+
+        # extract all paragraph text
+        article_text = ' '.join([
+            p.text.encode('ascii', 'ignore').decode('ascii')
+            for p in article_body.findAll('p')
+        ])
+
+        # put in dict
+        article = {
+            'article_title': article_title,
+            'article_text': article_text
+        }
+
+        return article
     except:
-        article_title = article_title.text.strip(' \n ')
-
-    # find block with article text
-    article_body = soup.find('div', class_='block article body')
-
-    # extract all paragraph text
-    article_text = ' '.join([
-        p.text.encode('ascii', 'ignore').decode('ascii')
-        for p in article_body.findAll('p')
-    ])
-
-    # put in dict
-    article = {
-        'article_title': article_title,
-        'article_text': article_text
-    }
-
-    return article
+        pass
 
 
 def get_articles(category):
@@ -94,7 +97,7 @@ def get_articles(category):
         str(len(page_links)), category))
 
     # extract article
-    articles = [extract_article(page_link) for page_link in page_links]
+    articles = [extract_article(page_link) for page_link in page_links[:5]]
 
     # add category
     for i in range(len(articles)):
@@ -129,5 +132,5 @@ def main(categories):
 
 
 # run main program
-categories = ['economie', 'sport', 'tech', 'entertainment', 'lifestyle']
+categories = ['economie']#, 'sport', 'tech', 'entertainment', 'lifestyle']
 main(categories)
