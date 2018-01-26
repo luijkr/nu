@@ -5,10 +5,13 @@ import json
 import pymongo
 
 from functools import partial
+from collections import Counter
 
 from nltk import word_tokenize
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
+
+from sklearn.feature_extraction import FeatureHasher
 
 
 def clean_words(words):
@@ -64,6 +67,19 @@ def process_article(article_text):
     return inputs
 
 
+def feature_hashing(words, n_features):
+    # define feature hasher
+    h = FeatureHasher(n_features=n_features)
+
+    # count words per article
+    D = [Counter(w) for w in words]
+
+    # transform into numeric array
+    f = h.transform(D).toarray()
+    
+    return f
+
+
 # define NL tokenizer
 tokenizer = partial(word_tokenize, language='dutch')
 
@@ -79,7 +95,6 @@ if include_custom:
 else:
     stop_words = set(stop_words_nltk)
 
-
 # connect to MongoDB
 client = pymongo.MongoClient('mongodb://localhost:27017/')
 
@@ -93,3 +108,6 @@ words = [
     process_article(article['article_text'] + article['article_title'])
     for article in articles
 ]
+
+fh = feature_hashing(words, n_features=100)
+
