@@ -4,13 +4,16 @@ import re
 import json
 import pymongo
 
+import numpy as np
+
 from functools import partial
-from collections import Counter
 
 from nltk import word_tokenize
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction import FeatureHasher
 
 
@@ -67,16 +70,14 @@ def process_article(article_text):
     return inputs
 
 
-def feature_hashing(words, n_features):
+def feature_hashing(tf, n_features):
+    """."""
     # define feature hasher
     h = FeatureHasher(n_features=n_features)
 
-    # count words per article
-    D = [Counter(w) for w in words]
-
     # transform into numeric array
-    f = h.transform(D).toarray()
-    
+    f = h.transform(tf).toarray()
+
     return f
 
 
@@ -98,10 +99,14 @@ else:
 # connect to MongoDB
 client = pymongo.MongoClient('mongodb://localhost:27017/')
 
-# grab data from database, collection NU
-db = client['newsarticles']
-collection = db['NU']
-articles = collection.find()
+# grab collection from within database
+conn = client['newsarticles']['NU']
+
+# extract articles
+articles = list(conn.find({'article_text': {'$ne': ''}}))
+
+# article category
+categories = [article['article_category'] for article in articles]
 
 # list of cleaned words per article
 words = [
@@ -109,5 +114,12 @@ words = [
     for article in articles
 ]
 
-fh = feature_hashing(words, n_features=100)
+# get word counts
+count_vect = CountVectorizer()
+counts = count_vect.fit_transform([' '.join(w) for w in words])
 
+# Term-Frequency Inverse-Document Frequency transformation
+tfidf = TfidfTransformer(use_idf=False).fit_transform(counts)
+
+y = np.array(categories) == 'tech'
+y = y.astype(int)
