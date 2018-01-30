@@ -57,20 +57,37 @@ def get_bag_of_stems(text):
 
 
 def process_article(article_text):
-    """Process article text."""
-    # get list of cleaned words
-    words = get_bag_of_words(article_text)
-
-    # get list of cleaned stems
+    """Process article text by stemming and cleaning."""
     stems = get_bag_of_stems(article_text)
 
-    # combine
-    inputs = list(set.union(set(words), set(stems)))
-
-    return inputs
+    return stems
 
 
-def feature_hashing(tf, n_features):
+def get_tfidf(words):
+    """Calculate TF-IDF matrix."""
+    # get word counts
+    count_vect = CountVectorizer(strip_accents='unicode')
+    counts = count_vect.fit_transform([' '.join(w) for w in words])
+
+    # Term-Frequency Inverse-Document Frequency transformation
+    tfidf = TfidfTransformer(sublinear_tf=True).fit_transform(counts)
+    
+    return tfidf
+
+
+def normalized_counts(words):
+    """Calculate counts, normalize them."""
+    # get word counts
+    count_vect = CountVectorizer(strip_accents='unicode')
+    counts = count_vect.fit_transform([' '.join(w) for w in words])
+    
+    # scale to [0, 1] within document
+    
+    
+    # 
+
+
+def feature_hashing(words, n_features):
     """."""
     # define feature hasher
     h = FeatureHasher(n_features=n_features)
@@ -114,12 +131,13 @@ words = [
     for article in articles
 ]
 
-# get word counts
-count_vect = CountVectorizer()
-counts = count_vect.fit_transform([' '.join(w) for w in words])
+# get counts
+counts = [Counter(w) for w in words]
 
-# Term-Frequency Inverse-Document Frequency transformation
-tfidf = TfidfTransformer(use_idf=False).fit_transform(counts)
+# get TF-IDF
+tfidf = get_tfidf(words)
 
-y = np.array(categories) == 'tech'
-y = y.astype(int)
+
+from collections import Counter
+
+h.transform(Counter(words[0]))
