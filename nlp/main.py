@@ -4,9 +4,8 @@ import re
 import json
 import pymongo
 
-import numpy as np
-
 from functools import partial
+from collections import Counter
 
 from nltk import word_tokenize
 from nltk.stem.snowball import SnowballStemmer
@@ -18,8 +17,7 @@ from sklearn.feature_extraction import FeatureHasher
 
 
 def clean_words(words):
-    """
-    Perform cleaning.
+    """Perform cleaning.
 
     Convert to lower case, remove non-letter characters, remove stop words,
     remove very short words.
@@ -71,29 +69,45 @@ def get_tfidf(words):
 
     # Term-Frequency Inverse-Document Frequency transformation
     tfidf = TfidfTransformer(sublinear_tf=True).fit_transform(counts)
-    
+
     return tfidf
+
+
+def scale_dict(d):
+    """Scale a single dictionary to [0, 1]."""
+    # extract values and keys
+    vals = d.values()
+    ks = d.keys()
+
+    # scale to [0, 1]
+    min_count = min(vals)
+    max_count = max(vals) - 1
+    vals = [1 + (v - min_count) / max_count for v in vals]
+
+    return {z[0]: z[1] for z in zip(ks, vals)}
 
 
 def normalized_counts(words):
     """Calculate counts, normalize them."""
     # get word counts
-    count_vect = CountVectorizer(strip_accents='unicode')
-    counts = count_vect.fit_transform([' '.join(w) for w in words])
-    
+    counts = [Counter(w) for w in words]
+
     # scale to [0, 1] within document
-    
-    
-    # 
+    counts = [scale_dict(d) for d in counts]
+
+    return counts
 
 
 def feature_hashing(words, n_features):
-    """."""
+    """Perform feature hashing."""
+    # calculate normalized counts
+    norm_counts = normalized_counts(words)
+
     # define feature hasher
     h = FeatureHasher(n_features=n_features)
 
     # transform into numeric array
-    f = h.transform(tf).toarray()
+    f = h.transform(norm_counts)
 
     return f
 
@@ -119,25 +133,20 @@ client = pymongo.MongoClient('mongodb://localhost:27017/')
 # grab collection from within database
 conn = client['newsarticles']['NU']
 
-# extract articles
-articles = list(conn.find({'article_text': {'$ne': ''}}))
-
-# article category
-categories = [article['article_category'] for article in articles]
-
-# list of cleaned words per article
-words = [
-    process_article(article['article_text'] + article['article_title'])
-    for article in articles
-]
-
-# get counts
-counts = [Counter(w) for w in words]
+# extract words and categories
+words = []
+identifier = []
+for article in conn.find({'article_text': {'$ne': ''}}):
+    words.append(process_article(
+        article['article_text'] + article['article_title']))
+    identifier.append(article['_id'])
 
 # get TF-IDF
 tfidf = get_tfidf(words)
 
+# feature hashing
+n_features = 2**10
+hashed = feature_hashing(words=words, n_features=10)
 
-from collections import Counter
-
-h.transform(Counter(words[0]))
+hashed[10,:].toarray()
+feature_hashing(words=[words[10]], n_features=10).toarray()
