@@ -113,6 +113,8 @@ categories = ['economie', 'sport', 'tech', 'entertainment', 'lifestyle']
 @sched.scheduled_job('interval', minutes=30)
 def main(categories=categories):
     """Run main program every hour."""
+    print('Starting main program.')
+
     # set log file
     fname = 'logs/{}.log'.format(
         time.strftime(
@@ -149,6 +151,8 @@ def main(categories=categories):
             category, len(urls))
         )
         for url in urls:
+            print(url)
+
             # scrape article
             article = scrape_article(url)
 
@@ -162,5 +166,5 @@ def main(categories=categories):
     file.close()
 
 
-# start scheduler, running every hour
+# start scheduler, running every 30 mins
 sched.start()
