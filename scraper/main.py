@@ -2,8 +2,9 @@
 
 import requests
 import itertools
-import pymongo
 import time
+import json
+import uuid
 from bs4 import BeautifulSoup
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -121,19 +122,14 @@ def main(categories=categories):
             "%Y_%m_%d-%H_%M_%S", time.localtime()
         )
     )
-    file = open(fname, 'w')
+    logfile = open(fname, 'w')
 
-    file.write('Start scraper for NU.nl.\n')
-
-    # connect to MongoDB
-    client = pymongo.MongoClient('mongodb://localhost:27017/')
-
-    # grab collection from within database
-    conn = client['newsarticles']['NU']
+    logfile.write('Start scraper for NU.nl.\n')
 
     # get urls of already scraped pages
-    done_urls = conn.find({}, {'article_url': 1})
-    done_urls = [du['article_url'] for du in done_urls]
+    done_fname = 'urls_done.csv'
+    done_file = open(done_fname, 'w+')
+    done_urls = [line.strip(';') for line in done_file]
 
     # get page links per category
     page_links = {
@@ -147,11 +143,12 @@ def main(categories=categories):
     # scrape articles
     for category in categories:
         urls = page_links[category]
-        file.write('Category "{}", scraping {} new pages\n'.format(
+        logfile.write('Category "{}", scraping {} new pages\n'.format(
             category, len(urls))
         )
         for url in urls:
             print(url)
+            done_file.write(url + ';')
 
             # scrape article
             article = scrape_article(url)
@@ -159,11 +156,15 @@ def main(categories=categories):
             # add article category
             article['article_category'] = category
 
-            # store in database
-            conn.insert_one(article)
+            # save to file
+            out_fname = 'articles/{}.json'.format(str(uuid.uuid4()))
+            with open(out_fname, 'w') as outfile:
+                json.dump(article, outfile)
+
+            outfile.close()
 
     # close logging file
-    file.close()
+    logfile.close()
 
 
 # start scheduler, running every 30 mins
