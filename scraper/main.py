@@ -101,10 +101,6 @@ def scrape_article(page_link):
 # set scheduler
 # sched = BlockingScheduler()
 
-# set categories to scrape
-categories = ['economie', 'sport', 'tech', 'entertainment', 'lifestyle']
-
-
 # @sched.scheduled_job('interval', minutes=30)
 def main(categories):
     """Run main program every hour."""
@@ -164,4 +160,8 @@ def main(categories):
 # start scheduler, running every 30 mins
 # sched.start()
 
-main()
+# set categories to scrape
+categories = ['economie', 'sport', 'tech', 'entertainment', 'lifestyle']
+
+# run main program
+main(categories)
