@@ -6,7 +6,7 @@ import time
 import json
 import uuid
 from bs4 import BeautifulSoup
-from apscheduler.schedulers.blocking import BlockingScheduler
+# from apscheduler.schedulers.blocking import BlockingScheduler
 
 
 def get_page_links(category):
@@ -105,8 +105,8 @@ sched = BlockingScheduler()
 categories = ['economie', 'sport', 'tech', 'entertainment', 'lifestyle']
 
 
-@sched.scheduled_job('interval', minutes=30)
-def main(categories=categories):
+# @sched.scheduled_job('interval', minutes=30)
+def main(categories):
     """Run main program every hour."""
     print('Starting main program.')
 
@@ -162,4 +162,6 @@ def main(categories=categories):
 
 
 # start scheduler, running every 30 mins
-sched.start()
+# sched.start()
+
+main()
