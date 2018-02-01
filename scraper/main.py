@@ -93,13 +93,7 @@ def scrape_article(page_link):
             'scrape_time': time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         }
     except:
-        # create dict without text
-        article = {
-            'article_title': '',
-            'article_text': '',
-            'article_url': page_link,
-            'scrape_time': time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        }
+        pass
 
     return article
 
