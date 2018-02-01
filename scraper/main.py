@@ -99,7 +99,7 @@ def scrape_article(page_link):
 
 
 # set scheduler
-sched = BlockingScheduler()
+# sched = BlockingScheduler()
 
 # set categories to scrape
 categories = ['economie', 'sport', 'tech', 'entertainment', 'lifestyle']
