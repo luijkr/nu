@@ -1,5 +1,4 @@
 requests
-pymongo
 bs4
 nltk
 sklearn
