@@ -2,7 +2,7 @@
 
 ### Objective of this repository
 
-Text.
+Continuously scrape news articles from the Dutch news website Nu.nl. Process the text, and make predictions as to which class it belongs to.
 
 ### Prerequisites
 
@@ -19,16 +19,14 @@ Install Python packages.
 pip install -r requirements.txt
 ```
 
-Pull docker images for Splash and MongoDB.
+Pull docker image for Splash.
 
 ```
 docker pull scrapinghub/splash
-docker pull mongo
 ```
 
 Run both images in the background.
 
 ```
 docker run -d -p 8050:8050 -p 5023:5023 scrapinghub/splash
-docker run -d -p 27017:27017 --name mongodb mongo
 ```
