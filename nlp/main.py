@@ -118,7 +118,7 @@ def add_hash(fname):
         json.dump(article, file)
 
     file.close()
-    
+
 
 # define NL tokenizer
 tokenizer = partial(word_tokenize, language='dutch')
@@ -139,7 +139,7 @@ else:
 article_paths = glob.glob('articles/*.json')
 
 # extract words, apply hash function, store in same object
-n_features = 2**10
+n_features = 2**12
 for path in article_paths:
     try:
         add_hash(path)
