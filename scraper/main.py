@@ -107,7 +107,7 @@ def main(categories):
     print('Starting main program.')
 
     # set log file
-    fname = 'logs/{}.log'.format(
+    fname = '/home/rluijk/Documents/gitrepos/nu/logs/{}.log'.format(
         time.strftime(
             "%Y_%m_%d-%H_%M_%S", time.localtime()
         )
@@ -147,7 +147,8 @@ def main(categories):
             article['article_category'] = category
 
             # save to file
-            out_fname = 'articles/{}.json'.format(str(uuid.uuid4()))
+            out_base = '/home/rluijk/Documents/gitrepos/nu/articles/{}.json'
+            out_fname = out_base.format(str(uuid.uuid4()))
             with open(out_fname, 'w') as outfile:
                 json.dump(article, outfile)
 
