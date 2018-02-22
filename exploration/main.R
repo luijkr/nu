@@ -24,6 +24,9 @@ df <- data.frame(
 # filter out articles without text
 df <- subset(df, text != '')
 
+# filter duplicates
+df <- subset(df, !duplicated(url))
+
 # number of observations per class
 df %>%
   group_by(category) %>%
@@ -34,17 +37,34 @@ df %>%
 
 # article structure
 words <- sapply(df$text, function(x) unlist(strsplit(x, split = ' ')))
+sentences <- sapply(df$text, function(x) unlist(strsplit(x, split = '.', fixed = TRUE)))
+df$nsentences <- sapply(sentences, length)
 df$nwords <- sapply(words, length)
+df$nwords_sentence = df$nwords / df$nsentences
 df$nwords_unique <- sapply(words, function(x) length(unique(x)) / length(x))
 df$nchars <- sapply(df$text, str_length)
 df$nchars_word <- df$nchars / df$nwords
 df$quotes <- str_count(df$text, pattern = '"')
 df$quotes_word <- df$quotes / df$nwords
 
+# filter on at least 4 sentences, otherwise it probably is an overview
+df <- subset(df, nsentences >= 4)
+
 # number of words
 ggplot(df, aes(x = category, y = nwords)) +
   geom_boxplot() +
   scale_y_log10() +
+  theme_bw()
+
+# number of sentences
+ggplot(df, aes(x = category, y = nsentences)) +
+  geom_boxplot() +
+  # scale_y_log10() +
+  theme_bw()
+
+# number of words per sentence
+ggplot(df, aes(x = category, y = nwords_sentence)) +
+  geom_boxplot() +
   theme_bw()
 
 # number of unique words / total number of words

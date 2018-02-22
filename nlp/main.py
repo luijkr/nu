@@ -108,6 +108,7 @@ def add_data(fname):
     words = process_article(all_text)
 
     # feature engineering
+    article['n_sentences'] = len(article['article_text'].split('.'))
     article['n_words'] = len(words)
     article['n_unique'] = len(set(words))
     article['prop_unique'] = article['n_unique'] / article['n_words']

@@ -34,7 +34,7 @@ def read_data():
     check_keys = [
         'article_category', 'hashed_vec', 'n_words', 'n_unique',
         'prop_unique', 'n_chars', 'n_chars_word',
-        'n_quotes', 'n_quotes_word',
+        'n_quotes', 'n_quotes_word', 'n_sentences'
     ]
     for path in article_paths:
         try:
@@ -60,6 +60,7 @@ def read_data():
                     article['n_quotes'],
                     article['n_quotes_word'],
                     float(article['n_quotes'] > 0),
+                    np.log10(article['n_sentences']),
                 ]
 
                 # add to data
