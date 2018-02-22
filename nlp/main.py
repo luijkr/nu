@@ -98,14 +98,23 @@ def feature_hashing(words, n_features):
     return f
 
 
-def add_hash(fname):
+def add_data(fname):
     """Perform feature hashing and add to file."""
     # read file
     article = json.load(open(fname))
 
     # process article text
-    words = process_article(
-        article['article_text'] + article['article_title'])
+    all_text = article['article_text'] + article['article_title']
+    words = process_article(all_text)
+
+    # feature engineering
+    article['n_words'] = len(words)
+    article['n_unique'] = len(set(words))
+    article['prop_unique'] = article['n_unique'] / article['n_words']
+    article['n_chars'] = len(all_text)
+    article['n_chars_word'] = article['n_chars'] / article['n_words']
+    article['n_quotes'] = all_text.count('"')
+    article['n_quotes_word'] = article['n_quotes'] / article['n_words']
 
     # feature hashing
     hashed = list(feature_hashing(words=[words], n_features=n_features))
@@ -138,10 +147,10 @@ else:
 # list of article paths
 article_paths = glob.glob('articles/*.json')
 
-# extract words, apply hash function, store in same object
+# extract words, apply hash function, add other variables, store in same object
 n_features = 2**12
 for path in article_paths:
     try:
-        add_hash(path)
+        add_data(path)
     except:
         pass
